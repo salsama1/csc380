@@ -8,6 +8,9 @@ import javax.swing.JOptionPane;
 import java.awt.Font;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+
+import net.proteanit.sql.DbUtils;
+
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JTable;
@@ -16,6 +19,7 @@ import javax.swing.border.EtchedBorder;
 import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JComboBox;
 
 public class thewindow {
 
@@ -48,16 +52,47 @@ public class thewindow {
 	 */
 	public thewindow() {
 		initialize();
+		connect();
+		table_load();
 	}
+	/*
+	PreparedStatement pst;
+	Connection con;
+	ResultSet rs;
+	
+	public void connect(){
+	 try {
+	 Class.forName("com.mysql.cj.jdbc.Driver");
+	 con = DriverManager.getConnection("jdbc:mysql://localhost:3306/coffe",
+	 "root", "");
+	 Statement statement = con.createStatement();
+	 ResultSet resultSet = statement.executeQuery("select * from designation");
+	 int code;
+	 String title;
+	 while (resultSet.next()) {
+	 code = resultSet.getInt("code");
+	 title = resultSet.getString("title").trim();
+	 System.out.println("Code : " + code + " Title : " + title);
+	 }
+	 resultSet.close();
+	 statement.close();
+	 con.close();
+	 }
+	 catch (Exception exception) {
+	 System.out.println(exception);
+	 } 
+	}*/
 	
 	 Connection con = null;
 	 PreparedStatement pst;
+	 ResultSet rs;
 
 	
 	public void connect(){
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			con = DriverManager.getConnection("jdbc:mysql://localhost:3306/coffe","root", "");
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			con = DriverManager.getConnection("jdbc:mysql://localhost:3306/coffe_manage_new",
+	 "root", "");
 		}
 		catch(ClassNotFoundException ex){
 			
@@ -65,7 +100,20 @@ public class thewindow {
 		catch(SQLException ex) {
 			
 		}
+		
 	}
+	
+	public void table_load() {
+		try {
+			pst = con.prepareStatement("select * from order");
+			rs = pst.executeQuery();
+			table.setModel(DbUtils.resultSetToTableModel(rs));
+		}
+		catch(SQLException ex) {
+			
+		}
+	}
+	
 		 
 
 	/**
@@ -77,7 +125,7 @@ public class thewindow {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
-		JLabel lblNewLabel = new JLabel("Coffee Shop");
+		JLabel lblNewLabel = new JLabel("coffee Shop");
 		lblNewLabel.setFont(new Font("Arial", Font.BOLD, 30));
 		lblNewLabel.setBounds(10, 11, 194, 99);
 		frame.getContentPane().add(lblNewLabel);
@@ -128,30 +176,42 @@ public class thewindow {
 		panel.add(txtAmount);
 		txtAmount.setColumns(10);
 		
+		JLabel lblNewLabel_1_3_1 = new JLabel("customer_phone");
+		lblNewLabel_1_3_1.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		lblNewLabel_1_3_1.setBounds(10, 227, 118, 38);
+		panel.add(lblNewLabel_1_3_1);
+		
+		JComboBox comboBox = new JComboBox();
+		comboBox.setBounds(188, 237, 30, 22);
+		panel.add(comboBox);
+		
 		JButton btnNewButton = new JButton("add");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
-				String Ordernum, Item, Amount, Ordertime;
+				String Ordernum, Item, Amount, Ordertime, customer_phone;
 				
 				Ordernum = txtOrdernum.getText();
 				Ordertime = txtOrdertime.getText();
 				Item = txtItem.getText();
 				Amount = txtAmount.getText();
+				//customer_phone = txtcustomer_phone.getText();
 				
 				try {
-					pst = con.prepareStatement("insert into order(Ordernum, Item, Amount, Date)values(?,?,?,?)");
+					pst = con.prepareStatement("insert into 'order'(Ordernum, Item, Amount, Date, customer_phone)values(?,?,?,?,?)");
 					pst.setString(1, Ordernum);
 					pst.setString(2, Ordertime);
 					pst.setString(3, Item);
 					pst.setString(4, Amount);
+					//pst.setString(5, customer_phone);
 					pst.executeUpdate();
 					JOptionPane.showMessageDialog(null, "added sucssefly");
-					//tabel_load();
+					table_load();
 					txtOrdernum.setText("");
 					txtOrdertime.setText("");
 					txtItem.setText("");
 					txtAmount.setText("");
+		            //txtcustomer_phone.setText("");
 					txtOrdernum.requestFocus();					
 
 				}catch(SQLException ex) {
@@ -164,6 +224,10 @@ public class thewindow {
 		frame.getContentPane().add(btnNewButton);
 		
 		JButton btnBack = new JButton("back");
+		btnBack.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		btnBack.setBounds(129, 408, 89, 23);
 		frame.getContentPane().add(btnBack);
 		
