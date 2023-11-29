@@ -20,8 +20,9 @@ import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
 
-public class thewindow {
+public class window {
 
 	private JFrame frame;
 	private JTextField txtOrdernum;
@@ -30,6 +31,7 @@ public class thewindow {
 	private JTextField txtAmount;
 	private JTable table;
 	private JTextField txtxOrderS;
+	private JComboBox comboPhone;
 
 	/**
 	 * Launch the application.
@@ -38,7 +40,7 @@ public class thewindow {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					thewindow window = new thewindow();
+					window window = new window();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -50,10 +52,11 @@ public class thewindow {
 	/**
 	 * Create the application.
 	 */
-	public thewindow() {
+	public window() {
 		initialize();
 		connect();
 		table_load();
+		load_data();
 	}
 	/*
 	PreparedStatement pst;
@@ -83,9 +86,10 @@ public class thewindow {
 	 } 
 	}*/
 	
-	 Connection con = null;
+	 Connection con;
 	 PreparedStatement pst;
 	 ResultSet rs;
+	 private JTextField txtNewON;
 
 	
 	public void connect(){
@@ -93,11 +97,16 @@ public class thewindow {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			con = DriverManager.getConnection("jdbc:mysql://localhost:3306/coffe_manage_new",
 	 "root", "");
+				
 		}
+		
 		catch(ClassNotFoundException ex){
+			System.out.print("d");
 			
 		}
 		catch(SQLException ex) {
+			System.out.print("s");
+
 			
 		}
 		
@@ -105,14 +114,34 @@ public class thewindow {
 	
 	public void table_load() {
 		try {
-			pst = con.prepareStatement("select * from order");
+			pst = con.prepareStatement("SELECT * FROM coffe_manage_new.order");
 			rs = pst.executeQuery();
 			table.setModel(DbUtils.resultSetToTableModel(rs));
 		}
+		
+		
 		catch(SQLException ex) {
 			
 		}
 	}
+	
+	public void load_data() {
+		String tmp = null;
+		try {
+            String sql="SELECT * FROM customer";
+            pst=con.prepareStatement(sql);
+            rs = pst.executeQuery(sql);
+            while(rs.next()){
+               comboPhone.addItem(rs.getString("customer_phone"));
+               tmp = (String) comboPhone.getSelectedItem();
+            }
+            //pst.close();
+            //rs.close();
+        }catch(Exception e) {
+             e.printStackTrace();
+        }
+	}
+	
 	
 		 
 
@@ -181,29 +210,29 @@ public class thewindow {
 		lblNewLabel_1_3_1.setBounds(10, 227, 118, 38);
 		panel.add(lblNewLabel_1_3_1);
 		
-		JComboBox comboBox = new JComboBox();
-		comboBox.setBounds(188, 237, 30, 22);
-		panel.add(comboBox);
+		comboPhone = new JComboBox();
+		comboPhone.setBounds(188, 237, 30, 22);
+		panel.add(comboPhone);
 		
 		JButton btnNewButton = new JButton("add");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
-				String Ordernum, Item, Amount, Ordertime, customer_phone;
+				String Ordernum, Ordertime, Item, amount ;
 				
 				Ordernum = txtOrdernum.getText();
 				Ordertime = txtOrdertime.getText();
 				Item = txtItem.getText();
-				Amount = txtAmount.getText();
-				//customer_phone = txtcustomer_phone.getText();
+				amount = txtAmount.getText();
 				
 				try {
-					pst = con.prepareStatement("insert into 'order'(Ordernum, Item, Amount, Date, customer_phone)values(?,?,?,?,?)");
+					pst = con.prepareStatement("INSERT INTO `coffe_manage_new`.`order`(`Ordernum`,`Ordertime`,`Item`,`amount`,`customer_customer_phone`) VALUES(?, ?, ?, ?, ?) ");
 					pst.setString(1, Ordernum);
 					pst.setString(2, Ordertime);
 					pst.setString(3, Item);
-					pst.setString(4, Amount);
-					//pst.setString(5, customer_phone);
+					pst.setString(4, amount);
+					String value = comboPhone.getSelectedItem().toString();
+					pst.setString(5, value);
 					pst.executeUpdate();
 					JOptionPane.showMessageDialog(null, "added sucssefly");
 					table_load();
@@ -222,14 +251,6 @@ public class thewindow {
 		});
 		btnNewButton.setBounds(30, 408, 89, 23);
 		frame.getContentPane().add(btnNewButton);
-		
-		JButton btnBack = new JButton("back");
-		btnBack.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		btnBack.setBounds(129, 408, 89, 23);
-		frame.getContentPane().add(btnBack);
 		
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(385, 103, 168, 293);
@@ -255,11 +276,92 @@ public class thewindow {
 		panel_1.add(txtxOrderS);
 		
 		JButton btnUpdate = new JButton("update");
-		btnUpdate.setBounds(385, 426, 89, 23);
+		btnUpdate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				String Ordernum, Ordertime, Item, amount, OldON ;
+				
+				Ordernum = txtOrdernum.getText();
+				Ordertime = txtOrdertime.getText();
+				Item = txtItem.getText();
+				amount = txtAmount.getText();
+				OldON = txtNewON.getText();
+
+				
+				try {
+					pst = con.prepareStatement("UPDATE `coffe_manage_new`.`order` SET `Ordernum` = ?, `Ordertime` = ?, `Item` = ?, `amount` = ?, `customer_customer_phone` = ? WHERE `Ordernum` = ? ");
+					pst.setString(1, Ordernum);
+					pst.setString(2, Ordertime);
+					pst.setString(3, Item);
+					pst.setString(4, amount);
+					String value = comboPhone.getSelectedItem().toString();
+					pst.setString(5, value);
+					pst.setString(6, OldON);
+					pst.executeUpdate();
+					JOptionPane.showMessageDialog(null, "updated sucssefly");
+					table_load();
+					txtOrdernum.setText("");
+					txtOrdertime.setText("");
+					txtItem.setText("");
+					txtAmount.setText("");
+		            //txtcustomer_phone.setText("");
+					txtOrdernum.requestFocus();					
+
+				}catch(SQLException ex) {
+					ex.printStackTrace();
+				}
+				
+			}
+		});
+		btnUpdate.setBounds(372, 426, 89, 23);
 		frame.getContentPane().add(btnUpdate);
 		
 		JButton btnDelete = new JButton("delete");
-		btnDelete.setBounds(484, 426, 89, 23);
+		btnDelete.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String Ordernum;
+				
+				Ordernum = txtOrdernum.getText();
+				
+				try {
+					pst = con.prepareStatement("DELETE FROM `coffe_manage_new`.`order`WHERE Ordernum =?");
+					pst.setString(1, Ordernum);
+					pst.executeUpdate();
+					JOptionPane.showMessageDialog(null, "deleted sucssefly");
+					table_load();
+					txtOrdernum.setText("");
+					txtOrdertime.setText("");
+					txtItem.setText("");
+					txtAmount.setText("");
+		            //txtcustomer_phone.setText("");
+					txtOrdernum.requestFocus();					
+
+				}catch(SQLException ex) {
+					ex.printStackTrace();
+				}
+			}
+		});
+		btnDelete.setBounds(471, 426, 89, 23);
 		frame.getContentPane().add(btnDelete);
+		
+		JButton btnNewButton_1 = new JButton("next");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				second s = new second();
+				s.setVisible(true);
+			}
+		});
+		btnNewButton_1.setBounds(129, 408, 89, 23);
+		frame.getContentPane().add(btnNewButton_1);
+		
+		JLabel lblNewLabel_1_5 = new JLabel("old_order number");
+		lblNewLabel_1_5.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		lblNewLabel_1_5.setBounds(385, 463, 129, 26);
+		frame.getContentPane().add(lblNewLabel_1_5);
+		
+		txtNewON = new JTextField();
+		txtNewON.setColumns(10);
+		txtNewON.setBounds(395, 497, 96, 20);
+		frame.getContentPane().add(txtNewON);
 	}
 }
