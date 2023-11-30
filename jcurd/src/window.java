@@ -30,7 +30,6 @@ public class window {
 	private JTextField txtItem;
 	private JTextField txtAmount;
 	private JTable table;
-	private JTextField txtxOrderS;
 	private JComboBox comboPhone;
 
 	/**
@@ -258,22 +257,6 @@ public class window {
 		
 		table = new JTable();
 		scrollPane.setViewportView(table);
-		
-		JPanel panel_1 = new JPanel();
-		panel_1.setBorder(new TitledBorder(null, "search", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_1.setBounds(20, 463, 338, 54);
-		frame.getContentPane().add(panel_1);
-		panel_1.setLayout(null);
-		
-		JLabel lblNewLabel_1_4 = new JLabel("order number");
-		lblNewLabel_1_4.setBounds(28, 17, 92, 26);
-		panel_1.add(lblNewLabel_1_4);
-		lblNewLabel_1_4.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		
-		txtxOrderS = new JTextField();
-		txtxOrderS.setColumns(10);
-		txtxOrderS.setBounds(173, 22, 96, 20);
-		panel_1.add(txtxOrderS);
 		
 		JButton btnUpdate = new JButton("update");
 		btnUpdate.addActionListener(new ActionListener() {
